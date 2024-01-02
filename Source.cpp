@@ -1,0 +1,68 @@
+#include <iostream>
+#include <windows.h>
+
+int n, avg = 0, max = INT_MIN, min = INT_MAX;
+int* arr;
+
+DWORD WINAPI min_max() {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+        Sleep(7);
+        if (arr[i] < min) {
+            min = arr[i];
+        }
+        Sleep(7);
+    }
+    std::cout << "max value: " << max << "\n min value: " << min;
+    return 0;
+}
+
+DWORD WINAPI average() {
+    for (int i = 0; i < n; i++) {
+        avg += arr[i];
+        Sleep(12);
+    }
+    avg /= n;
+    std::cout << "\n average value: " << avg << "\n";
+    return 0;
+}
+
+
+int main() {
+
+    std::cout << "Array size: ";
+    std::cin >> n;
+    arr = new int[n];
+    std::cout << "Input elements: ";
+    for (int i = 0; i < n; i++) {
+        std::cin >> arr[i];
+    }
+
+    HANDLE hThread_;
+    DWORD IDThread_;
+    HANDLE hThread;
+    DWORD IDThread;
+    hThread_ = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)min_max, NULL, 0, &IDThread_);
+    if (hThread_ == NULL) {
+        return GetLastError();
+    }
+    WaitForSingleObject(hThread_, INFINITE);
+    hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)average, NULL, 0, &IDThread);
+    if (hThread == NULL) {
+        return GetLastError();
+    }
+    WaitForSingleObject(hThread, INFINITE);
+    CloseHandle(hThread);
+    CloseHandle(hThread_);
+   for (int i = 0; i < n; i++) {
+        if (arr[i] == max || arr[i] == min)
+            arr[i] = avg;
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << arr[i]<< " ";
+    } 
+    delete[] arr;
+    return 0;
+}
